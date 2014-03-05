@@ -1,7 +1,10 @@
-#TODO some kind of interface so this actually runs
-#TODO Decrypt
+import textwrap
+try:
+    import readline
+except ImportError: # Only available on POSIX, but no big deal.
+    pass
 
-def intialize(key):
+def initialize(key):
     """
     This will generate a 256 entry list list
     Indices can not be greater than 255
@@ -38,3 +41,49 @@ def runRC4(k, text):
         cipherByte = byte ^ randomByteGen.next()  #Generate a new random byte, XOR the integer representing text charecter with this random byte
         cipherChars.append(chr(cipherByte))       #Turn it back into a char and put it in the array
     return ''.join(cipherChars)                   #Return the array
+
+def loop_user_query(k):
+    """Raises EOFError when the user uses an EOT escape sequence (i.e. ^D)."""
+    quotes = "'\""
+    while True:
+        text = raw_input('Enter plain or cipher text: ')
+        if text[0] == text[-1] and text[0] in quotes: #Assume text is ciphered if it is in quotes to start
+            # Unescape presumed ciphertext.
+            print 'Unescaping ciphertext...'
+            text = text[1:-1].decode('string_escape') #Makes the passed in text back into a string
+        k_copy = list(k)
+        print 'Your RC4 text is:', repr(runRC4(k_copy, text))  #Passing encoded text into RC4, with the same key, will unencode it
+        print
+ 
+ 
+def print_prologue():
+    title = 'RC4 Utility'
+    print '=' * len(title)
+    print title
+    print '=' * len(title)
+    explanation = """The output values are valid Python strings. They may
+contain escape characters of the form \\xhh to avoid confusing your terminal
+emulator. Only the first 256 characters of the encryption key are used."""
+    for line in textwrap.wrap(explanation, width=79):
+        print line
+    print
+ 
+ 
+def main():
+    """Present a command-line interface to the cipher."""
+    print_prologue()
+    # Acquire initial cipher values.
+    key = raw_input('Enter an encryption key: ')
+    print
+    key = [ord(char) for char in key]
+    k = initialize(key)
+    # Perform cipher until exit.
+    try:
+        loop_user_query(k)
+    except EOFError:
+        print
+        print 'Have a pleasant day!'
+ 
+ 
+if __name__ == '__main__':
+    main()
