@@ -1,3 +1,6 @@
+#TODO some kind of interface so this actually runs
+#TODO Decrypt
+
 def intialize(key):
     """
     This will generate a 256 entry list list
